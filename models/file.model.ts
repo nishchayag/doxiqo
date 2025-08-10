@@ -29,3 +29,8 @@ const fileSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+const ZipFile =
+  mongoose.models.ZipFile || mongoose.model("ZipFile", fileSchema);
+
+export default ZipFile;

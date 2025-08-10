@@ -1,4 +1,4 @@
-import mongoose, { mongo } from "mongoose";
+import mongoose from "mongoose";
 
 const projectSchema = new mongoose.Schema(
   {
@@ -6,6 +6,11 @@ const projectSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
+    },
+    originalZipUrl: {
+      type: String,
+      required: true,
+      trim: true,
     },
     name: {
       type: String,
@@ -16,8 +21,12 @@ const projectSchema = new mongoose.Schema(
       enum: ["processing", "completed"],
       default: "processing",
     },
-    files: [{ type: mongoose.Schema.Types.ObjectId, ref: "File" }],
     outputMd: { type: mongoose.Schema.Types.ObjectId, ref: "OutputMd" },
   },
   { timestamps: true }
 );
+
+const Project =
+  mongoose.models.Project || mongoose.model("Project", projectSchema);
+
+export default Project;
