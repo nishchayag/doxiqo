@@ -1,7 +1,13 @@
 import axios from "axios";
 import fs from "fs";
 import path from "path";
-export async function downloadFile(fileUrl: string, fileName: string) {
+export async function downloadFile({
+  fileUrl,
+  fileName,
+}: {
+  fileUrl: string;
+  fileName: string;
+}) {
   const response = await axios.get(fileUrl, { responseType: "arraybuffer" });
 
   if (response.status !== 200) {
