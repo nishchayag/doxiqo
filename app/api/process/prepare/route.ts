@@ -7,12 +7,12 @@ import path from "node:path";
 import fs from "node:fs/promises";
 var AdmZip = require("adm-zip");
 export async function POST(request: NextRequest) {
+  const { projectId } = await request.json();
   try {
     const session = await getServerSession();
     if (!session || !session.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }
-    const { projectId } = await request.json();
 
     if (!projectId) {
       return NextResponse.json(
@@ -35,6 +35,9 @@ export async function POST(request: NextRequest) {
         { status: 403 }
       );
     }
+
+    existingProject.status = "processing";
+    await existingProject.save();
 
     const originalZipUrl = existingProject.originalZipUrl;
 
@@ -226,6 +229,18 @@ export async function POST(request: NextRequest) {
       snippet: f.content.slice(0, 1000),
     }));
 
+    await existingProject.updateOne({
+      $set: {
+        preparedSummary: results.map((f) => f.content).join("\n\n"),
+      },
+    });
+
+    await existingProject.updateOne({
+      $set: {
+        status: "prepared",
+      },
+    });
+
     return NextResponse.json({
       projectId,
       extractDir,
@@ -242,6 +257,18 @@ export async function POST(request: NextRequest) {
     if (process.env.NODE_ENV !== "production") {
       console.error("File Processing error", error);
     }
+    const existingProject = await Project.findById(projectId);
+    await existingProject.updateOne({
+      $set: {
+        errorFields: [
+          {
+            field: "fileProcessing",
+            error: "File Processing failed",
+          },
+        ],
+        status: "failed",
+      },
+    });
     return NextResponse.json(
       { error: "File Processing failed" },
       { status: 500 }

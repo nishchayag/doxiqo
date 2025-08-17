@@ -2,21 +2,31 @@ import { NextResponse, NextRequest } from "next/server";
 import connectDB from "@/utils/connectDB";
 import UserModel from "@/models/user.model";
 import Project from "@/models/project.model";
+import { getServerSession } from "next-auth";
 
 export async function POST(request: NextRequest) {
   try {
-    const { userId, originalZipUrl, name } = await request.json();
+    const session = await getServerSession();
 
-    if (!userId || !originalZipUrl) {
+    if (!session || !session.user) {
       return NextResponse.json(
-        { error: "Missing userId or originalZipUrl" },
+        { error: "Unauthorized, Please sign in first." },
+        { status: 401 }
+      );
+    }
+
+    const { originalZipUrl, name } = await request.json();
+
+    if (!originalZipUrl) {
+      return NextResponse.json(
+        { error: "Missing originalZipUrl" },
         { status: 400 }
       );
     }
 
     await connectDB();
 
-    const user = await UserModel.findById(userId).select("_id");
+    const user = await UserModel.findById(session.user.id).select("_id");
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
@@ -25,7 +35,7 @@ export async function POST(request: NextRequest) {
       user: user._id,
       originalZipUrl,
       name: name?.toString().trim() || undefined,
-      status: "processing",
+      status: "uploading",
     });
 
     await UserModel.findByIdAndUpdate(user._id, {

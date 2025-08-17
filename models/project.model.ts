@@ -18,10 +18,30 @@ const projectSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["processing", "completed"],
-      default: "processing",
+      enum: [
+        "processing",
+        "completed",
+        "failed",
+        "cancelled",
+        "generating",
+        "uploading",
+        "prepared",
+      ],
+      default: "uploading",
     },
     outputMd: { type: mongoose.Schema.Types.ObjectId, ref: "OutputMd" },
+    preparedSummary: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    errorFields: [
+      {
+        field: { type: String, required: true },
+        error: { type: String, required: true },
+      },
+    ],
   },
   { timestamps: true }
 );
