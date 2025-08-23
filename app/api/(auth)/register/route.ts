@@ -2,7 +2,8 @@ import { NextResponse, NextRequest } from "next/server";
 import connectDB from "@/utils/connectDB";
 import User from "@/models/user.model";
 import bcrypt from "bcryptjs";
-export default async function POST(request: NextRequest) {
+
+export async function POST(request: NextRequest) {
   const { email, password, name } = await request.json();
   if (!email || !password || !name) {
     return NextResponse.json(

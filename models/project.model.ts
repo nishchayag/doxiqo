@@ -35,7 +35,12 @@ const projectSchema = new mongoose.Schema(
       default: "",
       trim: true,
     },
-
+    generationMeta: {
+      model: String,
+      promptTokens: Number,
+      completionTokens: Number,
+      durationMs: Number,
+    },
     errorFields: [
       {
         field: { type: String, required: true },

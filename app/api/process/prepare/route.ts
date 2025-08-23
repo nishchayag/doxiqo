@@ -5,7 +5,8 @@ import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
 import path from "node:path";
 import fs from "node:fs/promises";
-var AdmZip = require("adm-zip");
+import crypto from "node:crypto";
+import AdmZip from "adm-zip";
 export async function POST(request: NextRequest) {
   const { projectId } = await request.json();
   try {
@@ -40,15 +41,31 @@ export async function POST(request: NextRequest) {
     await existingProject.save();
 
     const originalZipUrl = existingProject.originalZipUrl;
-
-    const downloadedFilePath = await downloadFile({
-      fileUrl: originalZipUrl,
-      fileName: `project-${projectId}.zip`,
-    });
-
-    var zip = new AdmZip(downloadedFilePath);
     const extractDir = `/tmp/${projectId}`;
-    zip.extractAllTo(extractDir, true);
+
+    let isAlreadyExtracted = false;
+    try {
+      const dirStats = await fs.stat(extractDir);
+      if (dirStats.isDirectory()) {
+        const dirContents = await fs.readdir(extractDir);
+        isAlreadyExtracted = dirContents.length > 0;
+      }
+    } catch {
+      isAlreadyExtracted = false;
+    }
+
+    if (!isAlreadyExtracted) {
+      console.log(`Extracting ZIP for project ${projectId}...`);
+      const downloadedFilePath = await downloadFile({
+        fileUrl: originalZipUrl,
+        fileName: `project-${projectId}.zip`,
+      });
+
+      const zip = new AdmZip(downloadedFilePath);
+      zip.extractAllTo(extractDir, true);
+    } else {
+      console.log(`Using cached extraction for project ${projectId}`);
+    }
 
     const INCLUDE_FILES = new Set([
       "README",
@@ -130,6 +147,7 @@ export async function POST(request: NextRequest) {
       language: string;
       content: string;
       size: number;
+      hash: string;
     }> = [];
     let totalBytes = 0;
 
@@ -195,11 +213,17 @@ export async function POST(request: NextRequest) {
           const content = await fs.readFile(abs, "utf8"); // utf8 - unicode transformation format in 8 bits -> from chatgpt
           if (content.indexOf("\u0000") !== -1) continue; // binary guard for null characters -> from chatgpt
 
+          const hash = crypto
+            .createHash("sha256")
+            .update(content)
+            .digest("hex");
+
           results.push({
             path: rel,
             language: extToLang(ext),
             content,
             size: stat.size,
+            hash,
           });
           totalBytes += stat.size;
         } catch {
@@ -226,12 +250,25 @@ export async function POST(request: NextRequest) {
       path: f.path,
       language: f.language,
       size: f.size,
+      hash: f.hash,
       snippet: f.content.slice(0, 1000),
     }));
 
+    const structuredSummary = {
+      files: results.map((f) => ({
+        path: f.path,
+        language: f.language,
+        size: f.size,
+        hash: f.hash,
+      })),
+      totalFiles: results.length,
+      totalBytes,
+      extractedAt: new Date().toISOString(),
+    };
+
     await existingProject.updateOne({
       $set: {
-        preparedSummary: results.map((f) => f.content).join("\n\n"),
+        preparedSummary: JSON.stringify(structuredSummary),
       },
     });
 

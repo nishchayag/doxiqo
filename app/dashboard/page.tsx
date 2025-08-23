@@ -5,19 +5,28 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import LoadingSpinner from "@/components/LoadingSpinner";
 
-export default function HomePage() {
+// Import the original dashboard content
+import DashboardContent from "./DashboardContent";
+
+export default function DashboardPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
 
   useEffect(() => {
     if (status === "loading") return; // Still loading
 
-    if (session) {
-      router.push("/dashboard");
-    } else {
+    if (!session) {
       router.push("/landing");
     }
   }, [session, status, router]);
 
-  return <LoadingSpinner />;
+  if (status === "loading") {
+    return <LoadingSpinner />;
+  }
+
+  if (!session) {
+    return null; // Will redirect
+  }
+
+  return <DashboardContent />;
 }
