@@ -58,13 +58,13 @@ export default function LandingPage() {
           <Link href="/login">
             <Button
               variant="ghost"
-              className="text-gray-700 hover:text-blue-600"
+              className="text-gray-700 hover:text-blue-600 cursor-pointer"
             >
               Sign In
             </Button>
           </Link>
           <Link href="/signup">
-            <Button className="bg-blue-600 hover:bg-blue-700 text-white">
+            <Button className="bg-blue-600 hover:bg-blue-700 text-white cursor-pointer">
               Get Started
             </Button>
           </Link>
@@ -89,7 +89,7 @@ export default function LandingPage() {
                 <Link href="/signup">
                   <Button
                     size="lg"
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 text-lg"
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 text-lg cursor-pointer"
                     onMouseEnter={() => setIsHovered(true)}
                     onMouseLeave={() => setIsHovered(false)}
                   >
@@ -105,7 +105,7 @@ export default function LandingPage() {
                   <Button
                     variant="outline"
                     size="lg"
-                    className="px-8 py-3 text-lg"
+                    className="px-8 py-3 text-lg cursor-pointer"
                   >
                     Learn More
                   </Button>
@@ -114,23 +114,23 @@ export default function LandingPage() {
             </div>
             <div className="mt-14 flex justify-end gap-8 sm:-mt-44 sm:justify-start sm:pl-20 lg:mt-0 lg:pl-0">
               <div className="ml-auto w-44 flex-none space-y-8 pt-32 sm:ml-0 sm:pt-80 lg:order-last lg:pt-36 xl:order-none xl:pt-80">
-                <div className="relative">
-                  <div className="aspect-[2/3] w-full rounded-xl bg-gray-900/5 shadow-lg"></div>
+                <div className="relative hover:scale-105 transition-all duration-200">
+                  <div className="aspect-[2/3] w-full rounded-xl bg-gray-900/5 shadow-lg "></div>
                 </div>
               </div>
-              <div className="mr-auto w-44 flex-none space-y-8 sm:mr-0 sm:pt-52 lg:pt-36">
-                <div className="relative">
-                  <div className="aspect-[2/3] w-full rounded-xl bg-gray-900/5 shadow-lg"></div>
+              <div className="mr-auto w-44 flex-none space-y-8 sm:mr-0 sm:pt-52 lg:pt-36 ">
+                <div className="relative hover:scale-105 transition-all duration-200">
+                  <div className="aspect-[2/3] w-full rounded-xl bg-gray-900/5 shadow-lg "></div>
                 </div>
-                <div className="relative">
+                <div className="relative hover:scale-105 transition-all duration-200">
                   <div className="aspect-[2/3] w-full rounded-xl bg-gray-900/5 shadow-lg"></div>
                 </div>
               </div>
               <div className="w-44 flex-none space-y-8 pt-32 sm:pt-0">
-                <div className="relative">
+                <div className="relative hover:scale-105 transition-all duration-200">
                   <div className="aspect-[2/3] w-full rounded-xl bg-gray-900/5 shadow-lg"></div>
                 </div>
-                <div className="relative">
+                <div className="relative hover:scale-105 transition-all duration-200">
                   <div className="aspect-[2/3] w-full rounded-xl bg-gray-900/5 shadow-lg"></div>
                 </div>
               </div>
@@ -225,7 +225,7 @@ export default function LandingPage() {
               <Link href="/signup">
                 <Button
                   size="lg"
-                  className="bg-white text-blue-600 hover:bg-gray-50 px-8 py-3 text-lg font-semibold"
+                  className="px-8 py-3 text-lg font-semibold border-2 border-white cursor-pointer"
                 >
                   Get Started for Free
                 </Button>
@@ -234,7 +234,7 @@ export default function LandingPage() {
                 <Button
                   variant="outline"
                   size="lg"
-                  className="border-white text-white hover:bg-white hover:text-blue-600 px-8 py-3 text-lg"
+                  className="border-white text-blue-600 bg-white hover:bg-gray-200 px-8 py-3 text-lg cursor-pointer"
                 >
                   Sign In
                 </Button>
@@ -247,8 +247,9 @@ export default function LandingPage() {
       {/* Footer */}
       <footer className="bg-white">
         <div className="mx-auto max-w-7xl px-6 py-12 md:flex md:items-center md:justify-between lg:px-8">
-          <div className="flex justify-center space-x-6 md:order-2">
+          <div className="flex justify-center space-x-6 md:order-2 flex-col">
             <p className="text-gray-600">© 2025 Doxiqo. All rights reserved.</p>
+            <p className="text-gray-600">Email : nishchay.agar@gmail.com</p>
           </div>
           <div className="mt-8 md:order-1 md:mt-0">
             <div className="flex items-center space-x-2">

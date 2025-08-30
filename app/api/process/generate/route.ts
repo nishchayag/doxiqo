@@ -1,24 +1,24 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
+import authoptions from "@/utils/nextAuthOptions";
 import connectDB from "@/utils/connectDB";
 import Project from "@/models/project.model";
 import OutputMd from "@/models/outputMd.model";
 import { parsePreparedSummary } from "@/utils/preparedSummaryHelper";
 import { checkRateLimit, getRateLimitInfo } from "@/utils/rateLimit";
-import OpenAI from "openai";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 import fs from "node:fs/promises";
 import path from "node:path";
 
-// Initialize OpenAI client
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+// Initialize Gemini client
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
+const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
 export async function POST(request: NextRequest) {
   const startTime = Date.now();
 
   try {
-    const session = await getServerSession();
+    const session = await getServerSession(authoptions);
     if (!session || !session.user) {
       return NextResponse.json(
         { error: "Unauthorized. Please sign in first." },
@@ -47,12 +47,12 @@ export async function POST(request: NextRequest) {
     await connectDB();
 
     // Find and validate project
-    const project = await Project.findById(projectId);
+    const project = await Project.findById(projectId).populate("user", "_id");
     if (!project) {
       return NextResponse.json({ error: "Project not found" }, { status: 404 });
     }
 
-    if (project.user.toString() !== session.user.id) {
+    if (project.user._id.toString() !== session.user.id) {
       return NextResponse.json(
         { error: "Unauthorized to access this project" },
         { status: 403 }
@@ -105,30 +105,17 @@ export async function POST(request: NextRequest) {
     }>;
 
     // Build AI prompt
-    const prompt = buildDocumentationPrompt(
+    const systemInstruction =
+      "You are an expert technical writer who creates comprehensive, well-structured documentation for software projects. Generate clear, professional documentation in markdown format.";
+    const fullPrompt = `${systemInstruction}\n\n${buildDocumentationPrompt(
       validFiles,
       project.name || "Project"
-    );
+    )}`;
 
-    // Call OpenAI API
-    const completion = await openai.chat.completions.create({
-      model: "gpt-4o",
-      messages: [
-        {
-          role: "system",
-          content:
-            "You are an expert technical writer who creates comprehensive, well-structured documentation for software projects. Generate clear, professional documentation in markdown format.",
-        },
-        {
-          role: "user",
-          content: prompt,
-        },
-      ],
-      max_tokens: 4000,
-      temperature: 0.3,
-    });
-
-    const generatedMarkdown = completion.choices[0]?.message?.content;
+    // Call Gemini API
+    const result = await model.generateContent(fullPrompt);
+    const response = await result.response;
+    const generatedMarkdown = response.text();
 
     if (!generatedMarkdown) {
       throw new Error("Failed to generate documentation");
@@ -143,9 +130,11 @@ export async function POST(request: NextRequest) {
 
     // Calculate generation metadata
     const generationMeta = {
-      model: "gpt-4o",
-      promptTokens: completion.usage?.prompt_tokens || 0,
-      completionTokens: completion.usage?.completion_tokens || 0,
+      model: "gemini-1.5-flash",
+      promptTokens: result.response.usageMetadata?.promptTokenCount || 0,
+      completionTokens:
+        result.response.usageMetadata?.candidatesTokenCount || 0,
+      totalTokens: result.response.usageMetadata?.totalTokenCount || 0,
       durationMs: Date.now() - startTime,
     };
 

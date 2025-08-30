@@ -3,10 +3,11 @@ import connectDB from "@/utils/connectDB";
 import UserModel from "@/models/user.model";
 import Project from "@/models/project.model";
 import { getServerSession } from "next-auth";
+import authoptions from "@/utils/nextAuthOptions";
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession();
+    const session = await getServerSession(authoptions);
 
     if (!session || !session.user) {
       return NextResponse.json(

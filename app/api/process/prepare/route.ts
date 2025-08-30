@@ -2,6 +2,7 @@ import Project from "@/models/project.model";
 import connectDB from "@/utils/connectDB";
 import { downloadFile } from "@/utils/fileDownloader";
 import { getServerSession } from "next-auth";
+import authoptions from "@/utils/nextAuthOptions";
 import { NextRequest, NextResponse } from "next/server";
 import path from "node:path";
 import fs from "node:fs/promises";
@@ -10,7 +11,7 @@ import AdmZip from "adm-zip";
 export async function POST(request: NextRequest) {
   const { projectId } = await request.json();
   try {
-    const session = await getServerSession();
+    const session = await getServerSession(authoptions);
     if (!session || !session.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }
@@ -24,7 +25,10 @@ export async function POST(request: NextRequest) {
 
     await connectDB();
 
-    const existingProject = await Project.findById(projectId);
+    const existingProject = await Project.findById(projectId).populate(
+      "user",
+      "_id"
+    );
 
     if (!existingProject) {
       return NextResponse.json({ error: "Project not found" }, { status: 404 });
@@ -40,7 +44,40 @@ export async function POST(request: NextRequest) {
     existingProject.status = "processing";
     await existingProject.save();
 
-    const originalZipUrl = existingProject.originalZipUrl;
+    // Instead of using the old stored URL, get the latest file from UploadThing
+    let originalZipUrl = existingProject.originalZipUrl;
+
+    // Try to get the most recent file from UploadThing
+    try {
+      const recentResponse = await fetch(
+        `${request.nextUrl.origin}/api/uploadthing/recent`,
+        {
+          headers: {
+            Cookie: request.headers.get("cookie") || "",
+          },
+        }
+      );
+
+      if (recentResponse.ok) {
+        const recentData = await recentResponse.json();
+        if (recentData.url) {
+          originalZipUrl = recentData.url;
+          console.log(`Using latest UploadThing URL: ${originalZipUrl}`);
+
+          // Update the project with the new URL
+          existingProject.originalZipUrl = originalZipUrl;
+          await existingProject.save();
+        }
+      } else {
+        console.log("Falling back to stored URL:", originalZipUrl);
+      }
+    } catch (fetchError) {
+      console.log(
+        "Failed to fetch latest UploadThing URL, using stored URL:",
+        fetchError
+      );
+    }
+
     const extractDir = `/tmp/${projectId}`;
 
     let isAlreadyExtracted = false;
@@ -307,7 +344,7 @@ export async function POST(request: NextRequest) {
       },
     });
     return NextResponse.json(
-      { error: "File Processing failed" },
+      { error: "File Processing failed: " + error },
       { status: 500 }
     );
   }

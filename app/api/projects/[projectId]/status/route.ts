@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
+import authoptions from "@/utils/nextAuthOptions";
 import connectDB from "@/utils/connectDB";
 import Project from "@/models/project.model";
 
@@ -17,10 +18,10 @@ interface StatusResponse {
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { projectId: string } }
+  { params }: { params: Promise<{ projectId: string }> }
 ) {
   try {
-    const session = await getServerSession();
+    const session = await getServerSession(authoptions);
     if (!session || !session.user) {
       return NextResponse.json(
         { error: "Unauthorized. Please sign in first." },
@@ -28,7 +29,7 @@ export async function GET(
       );
     }
 
-    const { projectId } = params;
+    const { projectId } = await params;
 
     if (!projectId) {
       return NextResponse.json({ error: "Missing projectId" }, { status: 400 });
@@ -39,15 +40,16 @@ export async function GET(
     // Find project and validate ownership
     const project = await Project.findById(projectId)
       .populate("outputMd", "_id")
+      .populate("user", "_id")
       .select(
-        "status outputMd errorFields generationMeta createdAt updatedAt name"
+        "status outputMd errorFields generationMeta createdAt updatedAt name user"
       );
 
     if (!project) {
       return NextResponse.json({ error: "Project not found" }, { status: 404 });
     }
 
-    if (project.user.toString() !== session.user.id) {
+    if (project.user._id.toString() !== session.user.id) {
       return NextResponse.json(
         { error: "Unauthorized to access this project" },
         { status: 403 }

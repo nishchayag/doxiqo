@@ -1,14 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
+import authoptions from "@/utils/nextAuthOptions";
 import connectDB from "@/utils/connectDB";
 import OutputMd from "@/models/outputMd.model";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { outputId: string } }
+  { params }: { params: Promise<{ outputId: string }> }
 ) {
   try {
-    const session = await getServerSession();
+    const session = await getServerSession(authoptions);
     if (!session || !session.user) {
       return NextResponse.json(
         { error: "Unauthorized. Please sign in first." },
@@ -16,7 +17,7 @@ export async function GET(
       );
     }
 
-    const { outputId } = params;
+    const { outputId } = await params;
 
     if (!outputId) {
       return NextResponse.json({ error: "Missing outputId" }, { status: 400 });
@@ -27,7 +28,7 @@ export async function GET(
     // Find output document and validate ownership
     const outputMd = await OutputMd.findById(outputId).populate(
       "projectId",
-      "name user"
+      "name"
     );
 
     if (!outputMd) {
@@ -37,13 +38,8 @@ export async function GET(
       );
     }
 
-    // Check ownership through userId and project.user
-    const isOwner =
-      outputMd.userId.toString() === session.user.id ||
-      (outputMd.projectId &&
-        outputMd.projectId.user.toString() === session.user.id);
-
-    if (!isOwner) {
+    // Check ownership - the outputMd has a userId field that should match the session user
+    if (outputMd.userId.toString() !== session.user.id) {
       return NextResponse.json(
         { error: "Unauthorized to access this documentation" },
         { status: 403 }
