@@ -49,7 +49,7 @@ NEXTAUTH_SECRET=generate-a-strong-secret-key
 NEXTAUTH_URL=https://your-domain.vercel.app
 UPLOADTHING_SECRET=your-uploadthing-secret
 UPLOADTHING_APP_ID=your-uploadthing-app-id
-GEMINI_API_KEY=AIzaSyDJkqFwxUt03eitH_yC0-uPrVFGOz1Y5q8
+GEMINI_API_KEY=your-gemini-api-key
 
 # Optional (for GitHub OAuth)
 GITHUB_ID=your-github-oauth-app-id
