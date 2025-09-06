@@ -8,7 +8,7 @@ Add these environment variables in your Vercel project settings:
 
 ```bash
 # Required
-MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/doxiqo
+MONGODB_URI=your-mongodb-uri
 NEXTAUTH_SECRET=generate-a-strong-secret-key
 NEXTAUTH_URL=https://your-domain.vercel.app
 UPLOADTHING_TOKEN=your-uploadthing-token

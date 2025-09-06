@@ -44,7 +44,7 @@ git push origin main
 In your Vercel project dashboard, add these environment variables:
 
 ```bash
-MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/doxiqo
+MONGODB_URI=your-mongodb-uri
 NEXTAUTH_SECRET=generate-a-strong-secret-key
 NEXTAUTH_URL=https://your-domain.vercel.app
 UPLOADTHING_SECRET=your-uploadthing-secret
