@@ -78,7 +78,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const extractDir = `/tmp/${projectId}`;
+    // Use Vercel-compatible temp directory
+    const extractDir = process.env.VERCEL
+      ? `/tmp/${projectId}`
+      : `./tmp/${projectId}`;
 
     let isAlreadyExtracted = false;
     try {

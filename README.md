@@ -16,7 +16,7 @@ Doxiqo is a powerful AI-driven tool that automatically generates comprehensive d
 - **Frontend**: Next.js 15.4.5 with React 19.1.0, TypeScript, Tailwind CSS
 - **Authentication**: NextAuth.js with GitHub and Credentials providers
 - **File Upload**: UploadThing for secure file handling
-- **AI Processing**: OpenAI GPT-4o integration
+- **AI Processing**: Google Gemini AI integration
 - **Database**: MongoDB with Mongoose ODM
 - **Storage**: Secure file processing with ZIP extraction
 
@@ -26,7 +26,7 @@ Doxiqo is a powerful AI-driven tool that automatically generates comprehensive d
 
 - Node.js 18+
 - MongoDB database
-- OpenAI API key
+- Google Gemini AI API key
 - UploadThing account (for file uploads)
 - GitHub OAuth app (optional, for GitHub login)
 
@@ -56,8 +56,8 @@ GITHUB_SECRET=your-github-app-secret
 UPLOADTHING_SECRET=your-uploadthing-secret
 UPLOADTHING_APP_ID=your-uploadthing-app-id
 
-# OpenAI
-OPENAI_API_KEY=your-openai-api-key-here
+# Google Gemini AI
+GEMINI_API_KEY=your-gemini-api-key-here
 ```
 
 ### Installation
@@ -128,7 +128,7 @@ npm run type-check   # Run TypeScript type checking
 
 - **NextAuth**: Requires `NEXTAUTH_SECRET` for JWT encryption
 - **MongoDB**: Ensure your MongoDB instance is running and accessible
-- **OpenAI**: Get your API key from [OpenAI Platform](https://platform.openai.com/api-keys)
+- **Google Gemini AI**: Get your API key from [Google AI Studio](https://aistudio.google.com/app/apikey)
 - **UploadThing**: Sign up at [UploadThing](https://uploadthing.com/) for file upload service
 - **GitHub OAuth**: Create an app at [GitHub Developer Settings](https://github.com/settings/applications/new)
 

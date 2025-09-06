@@ -69,12 +69,14 @@ export async function downloadFile({
   console.log(`Final URL to download: ${actualFileUrl}`);
 
   try {
-    const filePath = path.join("/tmp", fileName);
+    // Use Vercel-compatible temp directory
+    const tmpDir = process.env.VERCEL ? "/tmp" : "./tmp";
+    const filePath = path.join(tmpDir, fileName);
 
     // Ensure the tmp directory exists
-    const tmpDir = path.dirname(filePath);
-    if (!fs.existsSync(tmpDir)) {
-      fs.mkdirSync(tmpDir, { recursive: true });
+    const dirPath = path.dirname(filePath);
+    if (!fs.existsSync(dirPath)) {
+      fs.mkdirSync(dirPath, { recursive: true });
     }
 
     // Try different approaches for UploadThing URLs

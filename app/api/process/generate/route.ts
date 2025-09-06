@@ -78,7 +78,9 @@ export async function POST(request: NextRequest) {
     }
 
     const summary = parsePreparedSummary(project.preparedSummary);
-    const extractDir = `/tmp/${projectId}`;
+    const extractDir = process.env.VERCEL
+      ? `/tmp/${projectId}`
+      : `./tmp/${projectId}`;
 
     // Read file contents based on prepared summary
     const fileContents = await Promise.all(

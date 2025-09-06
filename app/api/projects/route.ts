@@ -1,11 +1,12 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
+import authoptions from "@/utils/nextAuthOptions";
 import connectDB from "@/utils/connectDB";
 import Project from "@/models/project.model";
 
 export async function GET() {
   try {
-    const session = await getServerSession();
+    const session = await getServerSession(authoptions);
     if (!session || !session.user) {
       return NextResponse.json(
         { error: "Unauthorized. Please sign in first." },

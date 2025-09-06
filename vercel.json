@@ -1,0 +1,22 @@
+{
+  "buildCommand": "npm run build",
+  "outputDirectory": ".next",
+  "devCommand": "npm run dev",
+  "installCommand": "npm install --legacy-peer-deps",
+  "functions": {
+    "app/api/process/generate/route.ts": {
+      "maxDuration": 300
+    },
+    "app/api/process/prepare/route.ts": {
+      "maxDuration": 60
+    }
+  },
+  "env": {
+    "MONGODB_URI": "@mongodb-uri",
+    "NEXTAUTH_SECRET": "@nextauth-secret",
+    "NEXTAUTH_URL": "@nextauth-url",
+    "UPLOADTHING_TOKEN": "@uploadthing-token",
+    "GEMINI_API_KEY": "@gemini-api-key"
+  },
+  "regions": ["iad1"]
+}
